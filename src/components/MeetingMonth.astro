@@ -1,0 +1,80 @@
+---
+import type { Schedule } from '../lib/schedule';
+
+interface Props {
+  label: string;
+  dates: string[];
+  schedule: Schedule;
+}
+
+const { label, dates, schedule: { today, visibleFrom, next } } = Astro.props;
+const lastDate = dates.at(-1) ?? '';
+---
+
+<li class="schedule-month" data-scheduled-through={lastDate} hidden={lastDate < visibleFrom}>
+  <h4>{label}</h4>
+  <ul class="schedule-days">
+    {dates.map((date) => (
+      <li data-scheduled-through={date} hidden={date < visibleFrom}>
+        <time datetime={date} aria-current={date === next ? 'date' : undefined} data-past={date < today ? '' : undefined}>
+          {Number(date.slice(-2))}
+        </time>
+      </li>
+    ))}
+  </ul>
+</li>
+
+<style>
+  .schedule-month {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    flex: 0 1 min(100%, clamp(8rem, 50% - 0.325rem, 9.5rem));
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.65rem;
+    background: #fff;
+  }
+
+  .schedule-month h4 {
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid var(--line);
+    background: #f7f1f1;
+    color: #613944;
+    font-size: 0.9375rem;
+    text-transform: capitalize;
+  }
+
+  .schedule-days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    background: var(--line);
+  }
+
+  .schedule-days li { flex: 1 0 40%; }
+
+  .schedule-days time {
+    display: grid;
+    height: 100%;
+    min-height: 2.75rem;
+    place-items: center;
+    padding: 0.5rem 0.25rem;
+    background: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .schedule-days time[data-past] { color: var(--muted); }
+
+  .schedule-month:has(time[aria-current="date"]) { border-color: #d69aa7; }
+
+  .schedule-month:has(time[aria-current="date"]) h4,
+  .schedule-days time[aria-current="date"] {
+    color: #8e172f;
+    background: #fbe8ed;
+  }
+
+  .schedule-days time[aria-current="date"] { box-shadow: inset 0 -3px var(--red); }
+</style>

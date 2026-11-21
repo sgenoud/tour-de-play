@@ -1,0 +1,126 @@
+---
+const calendarFile = 'tour-de-play.ics';
+const feedPath = `${import.meta.env.BASE_URL}calendar/${calendarFile}`;
+---
+
+<details class="subscription" data-calendar-subscription>
+  <summary class="calendar-button">
+    <span class="calendar-icon" aria-hidden="true"></span>
+    S’abonner au calendrier
+  </summary>
+
+  <div class="subscription-options">
+    <p><strong>Calendrier Apple.</strong> Ouvrez le lien dans Calendrier ou copiez l’adresse dans « Ajouter un calendrier avec abonnement ».</p>
+    <a data-apple-subscription hidden>Ouvrir dans Calendrier Apple</a>
+    <p><strong>Google Agenda.</strong> Sur un ordinateur, ajoutez l’adresse via « Autres agendas », puis « À partir de l’URL ».</p>
+
+    <div class="feed" data-feed-controls hidden>
+      <label for="calendar-feed">Adresse du calendrier</label>
+      <div class="feed-field">
+        <input id="calendar-feed" type="url" readonly />
+        <button type="button" data-copy-feed>Copier</button>
+      </div>
+      <p class="copy-status" role="status"></p>
+    </div>
+
+    <a href={feedPath} download={calendarFile}>Télécharger le fichier .ics</a>
+  </div>
+</details>
+
+<script>
+  const subscription = document.querySelector<HTMLDetailsElement>('[data-calendar-subscription]');
+
+  if (subscription) {
+    const download = subscription.querySelector<HTMLAnchorElement>('a[download]')!;
+    const apple = subscription.querySelector<HTMLAnchorElement>('[data-apple-subscription]')!;
+    const controls = subscription.querySelector<HTMLElement>('[data-feed-controls]')!;
+    const field = subscription.querySelector<HTMLInputElement>('#calendar-feed')!;
+    const copy = subscription.querySelector<HTMLButtonElement>('[data-copy-feed]')!;
+    const status = subscription.querySelector<HTMLElement>('[role="status"]')!;
+
+    if (/^https?:/.test(download.href)) {
+      apple.href = download.href.replace(/^https?:/, 'webcal:');
+      apple.hidden = false;
+      field.value = download.href;
+      controls.hidden = false;
+
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(field.value);
+          status.textContent = 'Adresse copiée.';
+        } catch {
+          field.focus();
+          field.select();
+          status.textContent = 'Copiez l’adresse sélectionnée.';
+        }
+      });
+    }
+  }
+</script>
+
+<style>
+  .subscription[open] { width: min(100%, 25rem); }
+
+  .calendar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.95rem 1rem;
+    color: #fff;
+    background: var(--red);
+    border-radius: 8px;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .calendar-button::-webkit-details-marker { display: none; }
+  .calendar-button:hover { background: #84132c; }
+  .calendar-button:focus-visible { outline: 2px solid var(--red); outline-offset: 4px; }
+
+  .calendar-icon {
+    position: relative;
+    flex: 0 0 1rem;
+    height: 0.95rem;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+  }
+
+  .calendar-icon::before, .calendar-icon::after { content: ''; position: absolute; }
+  .calendar-icon::before { inset: 3px 0 auto; border-top: 1.5px solid currentColor; }
+  .calendar-icon::after { top: -4px; left: 3px; right: 3px; height: 4px; border-inline: 1.5px solid currentColor; }
+
+  .subscription-options {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 0.65rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .subscription-options a { color: var(--red); text-underline-offset: 0.2em; }
+
+  .feed label { display: block; margin-bottom: 0.35rem; font-weight: 650; }
+  .feed-field { display: flex; gap: 0.4rem; }
+  .feed-field input, .feed-field button {
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    color: inherit;
+    background: #fcfbfa;
+    font: inherit;
+  }
+
+  .feed-field input { flex: 1; min-width: 0; }
+  .feed-field button { cursor: pointer; color: var(--red); }
+  .feed-field button:hover { background: #f7f1f1; }
+  .copy-status:not(:empty) { margin-top: 0.35rem; }
+
+  @media (max-width: 22rem) {
+    .calendar-button { font-size: 0.9375rem; }
+  }
+</style>

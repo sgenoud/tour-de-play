@@ -1,0 +1,78 @@
+---
+import club from '../../club.json';
+import '../styles.css';
+---
+
+<!doctype html>
+<html lang="fr-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={`Soirées jeux de société à ${club.town} avec ${club.name}.`} />
+    <title>{club.name} | Soirées jeux de société</title>
+  </head>
+  <body>
+    <header class="site-header wrap">
+      <div class="club-logo">
+        <img src={`${import.meta.env.BASE_URL}leaflet.jpg`} width="1220" height="1967" alt={club.name} />
+      </div>
+    </header>
+
+    <slot />
+
+    <footer class="site-footer wrap">
+      <p>{club.name}</p>
+      <ul aria-label="Coordonnées">
+        <li><a href={`mailto:${club.email}`}>{club.email}</a></li>
+        <li><a href={club.facebook}>Facebook</a></li>
+      </ul>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    min-height: 7rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .club-logo {
+    position: relative;
+    width: 9.25rem;
+    aspect-ratio: 630 / 250;
+    overflow: hidden;
+    mix-blend-mode: multiply;
+  }
+
+  .club-logo img {
+    position: absolute;
+    left: -43.17%;
+    top: -167.6%;
+    width: 193.65%;
+    height: auto;
+  }
+
+  .site-footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-block: 1.55rem 2rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+
+  .site-footer p { font-weight: 750; color: #211b20; }
+  .site-footer ul { display: flex; flex-wrap: wrap; gap: 0.55rem 1.25rem; }
+  .site-footer a { text-underline-offset: 0.24em; }
+  .site-footer a:hover { color: var(--red); }
+
+  @media (max-width: 46rem) {
+    .site-header { min-height: 5.25rem; }
+    .club-logo { width: 7.5rem; }
+  }
+</style>

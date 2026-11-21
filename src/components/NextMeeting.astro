@@ -1,0 +1,168 @@
+---
+import club from '../../club.json';
+import { formatDate, startTimeLabel } from '../lib/schedule';
+
+interface Props {
+  next?: string;
+}
+
+const { next } = Astro.props;
+const town = `${club.postalCode} ${club.town}`;
+const mapSearch = encodeURIComponent(`${club.venue}, ${club.street}, ${town}`);
+---
+
+<section class="event" aria-labelledby="event-heading">
+  <div class="dice" aria-hidden="true">
+    <div class="die die-back"><i></i><i></i></div>
+    <div class="die die-front"><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <h2 class="eyebrow event-label" id="event-heading">Prochaine soirée</h2>
+  <div class="event-timing" id="event-timing" hidden={!next}>
+    <time class="event-date" id="event-date" datetime={next}>{next && formatDate(next)}</time>
+    <p class="event-time">Dès <time datetime={club.startTime}>{startTimeLabel}</time></p>
+  </div>
+  <p class="event-date" id="event-empty" hidden={!!next}>Date à venir</p>
+
+  <a class="event-place" href={`https://www.google.com/maps/search/?api=1&query=${mapSearch}`}>
+    <span class="place-icon" aria-hidden="true"></span>
+    <span><strong>{club.venue}</strong><br />{club.street}<br />{town}</span>
+  </a>
+</section>
+
+<script>
+  import { formatDate } from '../lib/schedule';
+  import { watchSchedule } from '../lib/schedule-updates';
+
+  const timing = document.querySelector<HTMLElement>('#event-timing')!;
+  const date = document.querySelector<HTMLTimeElement>('#event-date')!;
+  const empty = document.querySelector<HTMLElement>('#event-empty')!;
+
+  watchSchedule(({ next }) => {
+    timing.hidden = !next;
+    empty.hidden = !!next;
+
+    if (next) {
+      date.dateTime = next;
+      date.textContent = formatDate(next);
+    }
+  });
+</script>
+
+<style>
+  .event {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: clamp(1.65rem, 4vw, 3rem);
+    color: #fff;
+    background: #a31333;
+    border-radius: 1.5rem;
+    box-shadow: 0 18px 45px -28px #6d0b25a8;
+  }
+
+  .event-label { color: #ffe2e8; }
+
+  .event-date {
+    display: block;
+    max-width: 17ch;
+    margin-top: 0.8rem;
+    font-size: clamp(2rem, 3.3vw, 3.25rem);
+    line-height: 1.06;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+  }
+
+  .event-time {
+    margin-top: 0.6rem;
+    font-size: 1.125rem;
+    font-weight: 650;
+    color: #ffe2e8;
+  }
+
+  .event-place {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin: 1.55rem 0 1.6rem;
+    width: 100%;
+    padding-top: 1.35rem;
+    border-top: 1px solid #ffd9e160;
+    text-decoration: none;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: #ffe2e8;
+  }
+
+  .event-place strong { color: #fff; }
+  .event-place:hover strong { text-decoration: underline; text-underline-offset: 0.2em; }
+
+  .schedule-link {
+    font-weight: 700;
+    text-underline-offset: 0.22em;
+  }
+
+  .schedule-link:hover { color: #ffe2e8; }
+
+  .place-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 0.9rem;
+    height: 0.9rem;
+    margin-top: 0.23rem;
+    border: 1.5px solid currentColor;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+  }
+
+  .place-icon::after {
+    content: '';
+    width: 0.27rem;
+    height: 0.27rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .dice {
+    position: absolute;
+    z-index: -1;
+    right: -2.2rem;
+    bottom: -1.8rem;
+    width: 13rem;
+    height: 11rem;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .die {
+    width: 6.8rem;
+    aspect-ratio: 1;
+    position: absolute;
+    border: 2px solid #ff9bac;
+    border-radius: 1.2rem;
+    background: #bd2d4b;
+  }
+
+  .die-back { top: 0.4rem; right: 0.15rem; transform: rotate(22deg); }
+  .die-front { top: 3.3rem; left: 0.85rem; transform: rotate(-17deg); }
+
+  .die i {
+    position: absolute;
+    width: 0.95rem;
+    aspect-ratio: 1;
+    background: #ffc1cc;
+    border-radius: 50%;
+  }
+
+  .die i:nth-child(1) { top: 19%; left: 19%; }
+  .die i:nth-child(2) { bottom: 19%; right: 19%; }
+  .die i:nth-child(3) { top: 19%; right: 19%; }
+  .die i:nth-child(4) { bottom: 19%; left: 19%; }
+  .die i:nth-child(5) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+  @media (max-width: 22rem) {
+    .event { padding-inline: 1.25rem; }
+  }
+</style>

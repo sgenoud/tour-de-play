@@ -1,0 +1,34 @@
+---
+import ClubLayout from '../layouts/ClubLayout.astro';
+import ClubIntro from '../components/ClubIntro.astro';
+import NextMeeting from '../components/NextMeeting.astro';
+import MeetingCalendar from '../components/MeetingCalendar.astro';
+import { getSchedule } from '../lib/schedule';
+
+const schedule = getSchedule();
+---
+
+<ClubLayout>
+  <main class="wrap">
+    <div class="hero">
+      <ClubIntro />
+      <NextMeeting next={schedule.next} />
+    </div>
+
+    <MeetingCalendar schedule={schedule} />
+  </main>
+</ClubLayout>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(2.5rem, 7vw, 6rem);
+    align-items: center;
+    padding-block: clamp(3.75rem, 8.2vw, 7rem);
+  }
+
+  @media (max-width: 46rem) {
+    .hero { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: 2.75rem; }
+  }
+</style>

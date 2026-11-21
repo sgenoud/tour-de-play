@@ -1,0 +1,67 @@
+---
+import club from '../../club.json';
+---
+
+<div class="intro">
+  <p class="eyebrow location-label">{club.town}</p>
+  <h1>Soirées jeux<br class="title-break" /> de société<span>.</span></h1>
+  <p class="intro-copy">{club.welcome}</p>
+  <ul class="practical" aria-label="Infos pratiques">
+    <li>{club.admission}</li>
+    <li>{club.age}</li>
+    <li>{club.refreshments}</li>
+  </ul>
+</div>
+
+<style>
+  .location-label { color: var(--red); }
+
+  h1 {
+    margin: 1rem 0 1.5rem;
+    font-size: clamp(3rem, 6.1vw, 6rem);
+    font-weight: 800;
+    line-height: 0.97;
+    letter-spacing: -0.075em;
+  }
+
+  h1 span { color: var(--red); }
+
+  .intro-copy {
+    max-width: 29rem;
+    font-size: clamp(1.0625rem, 1.45vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .practical {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.75rem;
+    margin-top: 1.75rem;
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+
+  .practical li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .practical li::before {
+    content: '';
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 50%;
+    background: var(--red);
+  }
+
+  @media (max-width: 46rem) {
+    h1 { font-size: clamp(2.7rem, 9.5vw, 4.5rem); }
+    .practical { margin-top: 1.25rem; }
+  }
+
+  @media (max-width: 22rem) {
+    .title-break { display: none; }
+  }
+</style>

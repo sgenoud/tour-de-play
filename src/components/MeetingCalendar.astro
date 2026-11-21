@@ -1,0 +1,104 @@
+---
+import club from '../../club.json';
+import CalendarSubscription from './CalendarSubscription.astro';
+import MeetingMonth from './MeetingMonth.astro';
+import { dates, startTimeLabel, type Schedule } from '../lib/schedule';
+
+interface Props {
+  schedule: Schedule;
+}
+
+const { schedule } = Astro.props;
+const datesByYear = Object.groupBy(dates, (date) => date.slice(0, 4));
+const monthName = new Intl.DateTimeFormat('fr-CH', { month: 'long', timeZone: 'UTC' });
+---
+
+<section class="schedule" id="calendrier" aria-labelledby="schedule-heading">
+  <div class="schedule-header">
+    <div>
+      <h2 id="schedule-heading">Calendrier des soirées</h2>
+      <p class="usual-schedule">{club.usualSchedule}, dès <time datetime={club.startTime}>{startTimeLabel}</time>.</p>
+    </div>
+    {dates.length > 0 && <CalendarSubscription />}
+  </div>
+
+  {Object.entries(datesByYear).map(([year, yearDates = []]) => {
+    const lastDate = yearDates.at(-1) ?? '';
+    const datesByMonth = Object.groupBy(yearDates, (date) => date.slice(0, 7));
+
+    return (
+      <div class="schedule-year" data-scheduled-through={lastDate} hidden={lastDate < schedule.visibleFrom}>
+        <h3>{year}</h3>
+        <ul class="schedule-months">
+          {Object.entries(datesByMonth).map(([month, monthDates = []]) => (
+            <MeetingMonth
+              label={monthName.format(new Date(`${month}-01T00:00:00Z`))}
+              dates={monthDates}
+              schedule={schedule}
+            />
+          ))}
+        </ul>
+      </div>
+    );
+  })}
+</section>
+
+<script>
+  import { watchSchedule } from '../lib/schedule-updates';
+
+  const calendar = document.querySelector<HTMLElement>('#calendrier')!;
+  const entries = calendar.querySelectorAll<HTMLElement>('[data-scheduled-through]');
+  const days = calendar.querySelectorAll<HTMLTimeElement>('.schedule-days time');
+
+  watchSchedule(({ today, visibleFrom, next }) => {
+    for (const entry of entries) {
+      entry.hidden = (entry.dataset.scheduledThrough ?? '') < visibleFrom;
+    }
+
+    for (const day of days) {
+      day.toggleAttribute('data-past', day.dateTime < today);
+      if (day.dateTime === next) {
+        day.setAttribute('aria-current', 'date');
+      } else {
+        day.removeAttribute('aria-current');
+      }
+    }
+  });
+</script>
+
+<style>
+  .schedule {
+    border-top: 1px solid var(--line);
+    padding-block: clamp(2.25rem, 5vw, 4rem);
+  }
+
+  .schedule-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem 2rem;
+  }
+
+  .schedule h2 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    letter-spacing: -0.045em;
+    line-height: 1.12;
+  }
+
+  .usual-schedule {
+    margin-top: 0.65rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .schedule-year { margin-top: 1.75rem; }
+  .schedule-year h3 { margin-bottom: 0.85rem; font-size: 1.25rem; }
+
+  .schedule-months {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+</style>
